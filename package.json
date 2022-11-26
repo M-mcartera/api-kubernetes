@@ -1,0 +1,65 @@
+{
+  "name": "control-panel-api-kubernetes",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon --exec babel-node index.js",
+    "clean": "rimraf ./dist",
+    "build": "npm run clean && babel apps -d dist --quiet",
+    "build:watch": "babel src -d dist --watch",
+    "lint": "eslint --config .eslintrc.json src/.",
+    "lint:fix": "eslint src/. --config .eslintrc.json --fix",
+    "prettier": "prettier --write \"src/**/*.js\"",
+    "start": "node ./dist/index.js",
+    "start:prod": "node -r newrelic ./dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/M-mcartera/control-panel-api-kubernetes.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/M-mcartera/control-panel-api-kubernetes/issues"
+  },
+  "homepage": "https://github.com/M-mcartera/control-panel-api-kubernetes#readme",
+  "dependencies": {
+    "@keycloak/keycloak-admin-client": "^16.1.0",
+    "awilix": "^8.0.0",
+    "awilix-express": "^8.0.0",
+    "body-parser": "^1.20.1",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "keycloak-connect": "^20.0.1",
+    "lodash": "^4.17.21",
+    "mongodb": "^4.11.0",
+    "mongodb-uri": "^0.9.7",
+    "nodemon": "^2.0.20",
+    "winston": "^3.8.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.16.8",
+    "@babel/core": "^7.16.7",
+    "@babel/eslint-parser": "^7.16.5",
+    "@babel/node": "7.16.8",
+    "@babel/plugin-proposal-decorators": "^7.20.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.19.6",
+    "@babel/plugin-transform-runtime": "^7.19.6",
+    "@babel/preset-env": "7.16.8",
+    "eslint": "^8.27.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-unused-imports": "2.0.0",
+    "nodemon": "2.0.19",
+    "prettier": "^2.5.1",
+    "rimraf": "3.0.2"
+  }
+}

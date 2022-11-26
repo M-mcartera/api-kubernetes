@@ -1,0 +1,26 @@
+{
+    "presets": [
+        [
+            "@babel/preset-env",
+            {
+                "modules": "commonjs",
+                "targets": {
+                    "node": "current"
+                }
+            }
+        ]
+    ],
+    "plugins": [
+        "@babel/plugin-syntax-dynamic-import",
+        "@babel/plugin-proposal-class-properties",
+        "@babel/plugin-transform-async-to-generator",
+        "@babel/plugin-transform-arrow-functions",
+        "@babel/plugin-transform-destructuring",
+        "@babel/plugin-proposal-object-rest-spread",
+        "@babel/plugin-transform-spread",
+        "@babel/plugin-transform-classes",
+        ["@babel/plugin-transform-modules-commonjs", {
+            "allowTopLevelThis": true
+        }]
+    ]
+}
