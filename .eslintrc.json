@@ -1,0 +1,40 @@
+{
+  "extends": [
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:prettier/recommended"
+  ],
+  "plugins": ["unused-imports"],
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": false,
+    "es6": true,
+    "node": true
+  },
+  "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "singleQuote": true,
+        "trailingComma": "none",
+        "arrowParens": "avoid"
+      }
+    ],
+    "import/no-cycle": "error",
+    "import/first": "error",
+    "import/newline-after-import": "error",
+    "import/order": "error",
+    "unused-imports/no-unused-imports": "error",
+    "class-methods-use-this": 0,
+    "camelcase": 0,
+    "no-console": "error",
+    "no-underscore-dangle": 0,
+    "global-require": 0,
+    "no-new": 0,
+    "no-undef": "error"
+  }
+}

@@ -107,3 +107,6 @@ dist
 .DS_Store
 
 .idea/
+
+apps/configs/env.json
+package-lock.json
