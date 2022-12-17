@@ -1,4 +1,4 @@
-export default class GetUserPrivateController {
+export default class UpdateUserPrivateController {
   /**
    *
    * @param {SettingsService} SettingsService
@@ -12,11 +12,17 @@ export default class GetUserPrivateController {
   async handle(req, res, next) {
     try {
       const { username } = req.params;
-      const { success, user } = await this.usersService.getUser(username);
+      const {
+        success,
+        user,
+        msg = ''
+      } = await this.usersService.updateUser(username, req.body);
+
+      const transformedUser = this.transformer.transform(user);
 
       return res
         .status(success ? 200 : 500)
-        .send({ data: this.transformer.transform(user) });
+        .send(success ? { data: transformedUser } : { msg });
     } catch (e) {
       return next(e);
     }

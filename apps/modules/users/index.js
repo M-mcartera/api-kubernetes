@@ -3,13 +3,19 @@ import GetUsersPrivateRoute from './routes/GetUsersPrivateRoute';
 import containerBuilder from './containerBuilder';
 import GetUserPrivateRoute from './routes/GetUserPrivateRoute';
 import GetRolesListPrivateRoute from './routes/GetRolesListPrivateRoute';
+import UpdateUserPrivateRoute from './routes/UpdateUserPrivateRoute';
+import DeleteUserPrivateRoute from './routes/DeleteUserPrivateRoute';
+import CreateUserPrivateRoute from './routes/CreateUserPrivateRoute';
 
 export default new PrivateModule({
-    moduleName: 'users',
-    routes: [
-        GetUsersPrivateRoute,
-        GetUserPrivateRoute,
-        GetRolesListPrivateRoute
-    ],
-    containerBuilder
+  moduleName: 'users',
+  routes: [
+    GetUsersPrivateRoute,
+    GetUserPrivateRoute,
+    GetRolesListPrivateRoute,
+    UpdateUserPrivateRoute,
+    DeleteUserPrivateRoute,
+    CreateUserPrivateRoute
+  ],
+  containerBuilder
 });
