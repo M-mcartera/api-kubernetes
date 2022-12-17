@@ -64,4 +64,16 @@ export default class UsersService {
       return { success: false, msg: err.message };
     }
   }
+
+  async createUser(payload) {
+    try {
+      await this.keycloakService.authenticateAdmin();
+      const user = await this.keycloakService.createUser(payload);
+
+      const foundUser = await this.keycloakService.findUser(user.username);
+      return { success: true, user: foundUser };
+    } catch (err) {
+      return { success: false, msg: err.message };
+    }
+  }
 }

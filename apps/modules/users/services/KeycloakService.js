@@ -201,4 +201,46 @@ export default class KeycloakAdminClient {
       throw Error(err);
     }
   }
+
+  async createUser(payload) {
+    try {
+      await this.admin.setConfig({
+        realmName: this.serverSettings.keycloak_realm
+      });
+
+      const user = await this.admin.users.create({
+        username: payload.username,
+        email: payload.email,
+        emailVerified: true,
+        enabled: true
+      });
+
+      await this.admin.users.resetPassword({
+        id: user.id,
+        credential: {
+          temporary: false,
+          type: 'password',
+          value: payload.password
+        }
+      });
+
+      const keycloakRoles = await this.admin.roles.find();
+      const allUserRoles = keycloakRoles
+        .map(keyCloakRole => {
+          if (payload.roles.includes(keyCloakRole.name)) {
+            return { id: keyCloakRole.id, name: keyCloakRole.name };
+          }
+        })
+        .filter(role => role);
+
+      await this.admin.users.addRealmRoleMappings({
+        id: user.id,
+        roles: allUserRoles
+      });
+
+      return { success: true, user };
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
 }
