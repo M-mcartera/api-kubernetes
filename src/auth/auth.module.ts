@@ -10,6 +10,8 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './guards/jwtAuth.guard';
 import { UserRoleGuard } from './guards/roles.guard';
+import { Invite, InviteSchema } from 'src/models/invite.schema';
+import { MailService } from 'src/mail/mail.service';
 
 @Module({
   imports: [
@@ -17,6 +19,10 @@ import { UserRoleGuard } from './guards/roles.guard';
       {
         name: User.name,
         schema: UserSchema,
+      },
+      {
+        name: Invite.name,
+        schema: InviteSchema,
       },
     ]),
     JwtModule.register({
@@ -33,6 +39,7 @@ import { UserRoleGuard } from './guards/roles.guard';
     UserService,
     LocalStrategy,
     HashService,
+    MailService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
