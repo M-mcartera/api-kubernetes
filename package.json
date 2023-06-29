@@ -28,6 +28,8 @@
     "@nestjs/mongoose": "^10.0.0",
     "@nestjs/passport": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/platform-socket.io": "^10.0.3",
+    "@nestjs/websockets": "^10.0.3",
     "@sendgrid/mail": "^7.7.0",
     "@types/mongoose": "^5.11.97",
     "@types/passport-jwt": "^3.0.8",
@@ -41,7 +43,9 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.7.1",
+    "socket.io-client": "^4.7.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

@@ -12,6 +12,7 @@ import { JwtAuthGuard } from './guards/jwtAuth.guard';
 import { UserRoleGuard } from './guards/roles.guard';
 import { Invite, InviteSchema } from 'src/models/invite.schema';
 import { MailService } from 'src/mail/mail.service';
+import { SocketGateway } from 'src/socket/socket.gateway';
 
 @Module({
   imports: [

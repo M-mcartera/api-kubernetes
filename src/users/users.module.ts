@@ -9,6 +9,7 @@ import { JwtStrategy } from 'src/auth/strategies/jwt.strategy';
 import { LocalStrategy } from 'src/auth/strategies/local.strategy';
 import { Invite, InviteSchema } from 'src/models/invite.schema';
 import { MailService } from 'src/mail/mail.service';
+import { SocketGateway } from 'src/socket/socket.gateway';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { MailService } from 'src/mail/mail.service';
     LocalStrategy,
     AuthService,
     MailService,
+    SocketGateway,
   ],
 })
 export class UsersModule {}
