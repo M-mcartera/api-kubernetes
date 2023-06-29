@@ -1,15 +1,15 @@
 export default () => ({
   port: parseInt(process.env.PORT) || 3000,
-  FRONTEND_URL: 'http://localhost:3001',
+  FRONTEND_URL: process.env.FRONTEND_URL,
   database: {
-    url: '',
+    url: process.env.MONGO_URL,
   },
   jwt: {
-    secret: '',
-    expired: '',
+    secret: process.env.JWT_SECRET,
+    expired: process.env.JWT_EXPIRED,
   },
-  saltOrRounds: 10,
+  saltOrRounds: process.env.SALT_ROUNDS,
   sengrid: {
-    secure_key: '',
+    secure_key: process.env.SENGRID_SECURE_KEY,
   },
 });
