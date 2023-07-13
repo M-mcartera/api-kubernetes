@@ -63,6 +63,7 @@ export class UserService {
 
       return { success: true };
     } catch (err) {
+      console.log(err.message);
       throw new BadRequestException(err.message);
     }
   }

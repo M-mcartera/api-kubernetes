@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
 import { UsersModule } from './users/users.module';
 import { MailModule } from './mail/mail.module';
+import { KubernetesModule } from './kubernetes/kubernetes.module';
+import { LoggerService } from './logger/logger.service';
 
 @Module({
   imports: [
@@ -21,8 +23,9 @@ import { MailModule } from './mail/mail.module';
     UsersModule,
     AuthModule,
     MailModule,
+    KubernetesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, LoggerService],
 })
 export class AppModule {}
