@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { ROLES } from 'src/constants/constants';
 import { Public, Roles } from 'src/decorators/custom.decorators';
 import { KubernetesService } from './kubernetes.service';
@@ -32,7 +32,14 @@ export class KubernetesController {
 
   @Roles(ROLES.ADMIN)
   @Post('/namespaces')
-  createNamespace(namespace: string) {
-    return this.kubeService.createNamespace(namespace);
+  createNamespace(@Body() createNamespacePayload: { name: string }) {
+    const { name } = createNamespacePayload;
+    return this.kubeService.createNamespace(name);
+  }
+
+  @Roles(ROLES.ADMIN)
+  @Get('/validateNamespace')
+  validateNamespace(@Query('name') namespace: string) {
+    return this.kubeService.validateNamespace(namespace);
   }
 }

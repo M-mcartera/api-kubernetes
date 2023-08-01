@@ -16,6 +16,7 @@ import { ConfigService } from '@nestjs/config';
 import { RegisterFromInvitationDto } from './dto/registerFromInvitation.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { generateInvitationToken } from 'src/uits';
+import { KubernetesService } from 'src/kubernetes/kubernetes.service';
 
 @Injectable()
 export class UserService {
@@ -26,6 +27,7 @@ export class UserService {
     private readonly hashService: HashService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
+    private readonly kubeService: KubernetesService,
   ) {}
 
   async getUserByEmail(email: string): Promise<User> {
@@ -49,14 +51,16 @@ export class UserService {
         throw new BadRequestException('User not found');
       }
 
-      console.log(user);
-
       const hashedPassword = await this.hashService.hashPassword(password);
       await this.userModel.findByIdAndUpdate(user._id, {
         password: hashedPassword,
         active: true,
       });
 
+      await this.kubeService.createServiceAccount(
+        user._id.toString(),
+        user.username,
+      );
       await this.inviteModel.findByIdAndUpdate(foundToken._id, {
         redeemed: true,
       });

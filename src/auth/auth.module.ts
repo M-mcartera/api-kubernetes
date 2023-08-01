@@ -12,7 +12,10 @@ import { JwtAuthGuard } from './guards/jwtAuth.guard';
 import { UserRoleGuard } from './guards/roles.guard';
 import { Invite, InviteSchema } from 'src/models/invite.schema';
 import { MailService } from 'src/mail/mail.service';
-import { SocketGateway } from 'src/socket/socket.gateway';
+import { KubernetesService } from 'src/kubernetes/kubernetes.service';
+import { LoggerService } from 'src/logger/logger.service';
+import { KubernetesModule } from 'src/kubernetes/kubernetes.module';
+import { UserConfig, UserConfigSchema } from 'src/models/userConfig.schema';
 
 @Module({
   imports: [
@@ -25,6 +28,10 @@ import { SocketGateway } from 'src/socket/socket.gateway';
         name: Invite.name,
         schema: InviteSchema,
       },
+      {
+        name: UserConfig.name,
+        schema: UserConfigSchema,
+      },
     ]),
     JwtModule.register({
       global: true,
@@ -33,6 +40,7 @@ import { SocketGateway } from 'src/socket/socket.gateway';
         expiresIn: '60d',
       },
     }),
+    KubernetesModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -41,6 +49,8 @@ import { SocketGateway } from 'src/socket/socket.gateway';
     LocalStrategy,
     HashService,
     MailService,
+    KubernetesService,
+    LoggerService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
