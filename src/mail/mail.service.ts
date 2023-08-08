@@ -4,7 +4,6 @@ import * as SendGrid from '@sendgrid/mail';
 @Injectable()
 export class MailService {
   constructor(private readonly configService: ConfigService) {
-    console.log(this.configService.get('sengrid.secure_key'));
     SendGrid.setApiKey(this.configService.get('sengrid.secure_key'));
   }
 

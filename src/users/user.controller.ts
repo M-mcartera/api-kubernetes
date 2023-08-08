@@ -57,7 +57,6 @@ export class UserController {
   @Public()
   @Get('/validate-invitation')
   async validateInvitation(@Request() req) {
-    console.log('here');
     const { token } = req.query;
     return this.userService.validateInvitationToken(token);
   }

@@ -236,4 +236,12 @@ export class UserService {
       throw new BadRequestException(err.message);
     }
   }
+  async getUsernamesByIds(ids: string[]) {
+    if (!ids.length) return [];
+    const users = await this.userModel.find();
+    const usernames = users
+      .filter((user) => ids.includes(user._id.toString()))
+      .map((user) => user.username);
+    return usernames;
+  }
 }

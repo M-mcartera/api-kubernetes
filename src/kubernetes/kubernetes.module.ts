@@ -7,7 +7,6 @@ import { User, UserSchema } from 'src/models/user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Invite, InviteSchema } from 'src/models/invite.schema';
 import { HashService } from 'src/users/hash.service';
-import { UsersModule } from 'src/users/users.module';
 import { MailModule } from 'src/mail/mail.module';
 import { MailService } from 'src/mail/mail.service';
 import { UserConfig, UserConfigSchema } from 'src/models/userConfig.schema';

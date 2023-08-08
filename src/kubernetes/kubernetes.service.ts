@@ -1,14 +1,25 @@
-import { CoreV1Api, KubeConfig } from '@kubernetes/client-node';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  CoreV1Api,
+  KubeConfig,
+  RbacAuthorizationV1Api,
+} from '@kubernetes/client-node';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { LoggerService } from 'src/logger/logger.service';
 import * as fs from 'fs';
 import { exec } from 'child_process';
 import { UserConfig, UserConfigDocument } from 'src/models/userConfig.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { PERMISSION_RESOURCE } from 'src/global/interfaces';
+import { of } from 'rxjs';
 @Injectable()
 export class KubernetesService {
   private coreApi: CoreV1Api;
+  private roleApi: RbacAuthorizationV1Api;
   constructor(
     @InjectModel(UserConfig.name)
     private readonly userConfig: Model<UserConfigDocument>,
@@ -17,6 +28,7 @@ export class KubernetesService {
     const kubeConfig = new KubeConfig();
     kubeConfig.loadFromDefault();
     this.coreApi = kubeConfig.makeApiClient(CoreV1Api);
+    this.roleApi = kubeConfig.makeApiClient(RbacAuthorizationV1Api);
   }
 
   async getPods() {
@@ -210,6 +222,76 @@ export class KubernetesService {
       return kubeConfig;
     } catch (err) {
       console.log('Error generating kubeconfig', err.body);
+    }
+  }
+  generateClusterRoleRules(resources: PERMISSION_RESOURCE[]) {
+    const rules = [];
+
+    resources.forEach((resource) => {
+      const tempDto = {
+        apiGroups: [''],
+        resources: [],
+        verbs: [],
+      };
+      tempDto.resources.push(resource.name.toLowerCase());
+      const wildcard = resource.actions.find((action) => action.name === 'all');
+      if (wildcard.checked) {
+        tempDto.verbs.push('*');
+      } else {
+        resource.actions.forEach((action) => {
+          if (action.checked) {
+            tempDto.verbs.push(action.name.toLowerCase());
+          }
+        });
+      }
+      rules.push(tempDto);
+    });
+
+    return rules.filter((rule) => rule.verbs.length > 0);
+  }
+
+  async createClusterRole(roleName: string, resources: PERMISSION_RESOURCE[]) {
+    const rules = this.generateClusterRoleRules(resources);
+    try {
+      const clusterRole = {
+        apiVersion: 'rbac.authorization.k8s.io/v1',
+        kind: 'ClusterRole',
+        metadata: {
+          name: roleName,
+        },
+        rules,
+      };
+      return this.roleApi.createClusterRole(clusterRole);
+    } catch (err) {
+      this.loggerService.error('Error creating cluster role', err.message);
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  async deleteClusterRole(roleName: string) {
+    try {
+      return this.roleApi.deleteClusterRole(roleName);
+    } catch (err) {
+      this.loggerService.error('Error deleting cluster role', err.message);
+      throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  async updateClusterRole(roleName: string, resources: PERMISSION_RESOURCE[]) {
+    const rules = this.generateClusterRoleRules(resources);
+    try {
+      const clusterRole = {
+        apiVersion: 'rbac.authorization.k8s.io/v1',
+        kind: 'ClusterRole',
+        metadata: {
+          name: roleName,
+        },
+        rules,
+      };
+      return this.roleApi.replaceClusterRole(roleName, clusterRole);
+    } catch (err) {
+      this.loggerService.error('Error updating cluster role', err.message);
+      throw new InternalServerErrorException(err.message);
     }
   }
 }

@@ -9,6 +9,7 @@ import { UsersModule } from './users/users.module';
 import { MailModule } from './mail/mail.module';
 import { KubernetesModule } from './kubernetes/kubernetes.module';
 import { LoggerService } from './logger/logger.service';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { LoggerService } from './logger/logger.service';
     AuthModule,
     MailModule,
     KubernetesModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService, LoggerService],
