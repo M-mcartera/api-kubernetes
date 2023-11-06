@@ -62,6 +62,7 @@ export class RolesService {
           return role;
         }),
       );
+      console.log({ transformedRoles });
       return transformedRoles;
     } catch (err) {
       this.loggerService.error('Error getting roles', err.message);

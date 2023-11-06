@@ -16,6 +16,7 @@ import { KubernetesService } from 'src/kubernetes/kubernetes.service';
 import { LoggerService } from 'src/logger/logger.service';
 import { KubernetesModule } from 'src/kubernetes/kubernetes.module';
 import { UserConfig, UserConfigSchema } from 'src/models/userConfig.schema';
+import { Role, RoleSchema } from 'src/models/role.schema';
 
 @Module({
   imports: [
@@ -31,6 +32,10 @@ import { UserConfig, UserConfigSchema } from 'src/models/userConfig.schema';
       {
         name: UserConfig.name,
         schema: UserConfigSchema,
+      },
+      {
+        name: Role.name,
+        schema: RoleSchema,
       },
     ]),
     JwtModule.register({

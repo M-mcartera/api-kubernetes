@@ -15,7 +15,7 @@ import { UserConfig, UserConfigDocument } from 'src/models/userConfig.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { PERMISSION_RESOURCE } from 'src/global/interfaces';
-import { of } from 'rxjs';
+import { Role } from 'src/models/role.schema';
 @Injectable()
 export class KubernetesService {
   private coreApi: CoreV1Api;
@@ -292,6 +292,63 @@ export class KubernetesService {
     } catch (err) {
       this.loggerService.error('Error updating cluster role', err.message);
       throw new InternalServerErrorException(err.message);
+    }
+  }
+
+  generateClusterRoleBindingSubjects(
+    usersInRoles: string[],
+    newServiceAccount: string,
+  ) {
+    const subjects = usersInRoles.map((username: string) => {
+      return {
+        kind: 'ServiceAccount',
+        name: username,
+        namespace: 'default',
+      };
+    });
+    subjects.push({
+      kind: 'ServiceAccount',
+      name: newServiceAccount,
+      namespace: 'default',
+    });
+    return subjects;
+  }
+
+  async createClusterRoleBindings(
+    roleName: string,
+    usersInRoles: string[],
+    serviceAccountName: string,
+  ) {
+    try {
+      const foundRoleName = await this.roleApi.readClusterRole(roleName);
+      if (!foundRoleName) {
+        throw new InternalServerErrorException('Cluster role does not exists');
+      }
+
+      const subjects = this.generateClusterRoleBindingSubjects(
+        usersInRoles,
+        serviceAccountName,
+      );
+
+      console.log('SUBJECTS', subjects);
+      const clusterRoleBinding = {
+        metadata: {
+          name: `${roleName}-binding`,
+        },
+        subjects: subjects,
+        roleRef: {
+          kind: 'ClusterRole',
+          name: roleName,
+          apiGroup: 'rbac.authorization.k8s.io',
+        },
+      };
+
+      return this.roleApi.createClusterRoleBinding(clusterRoleBinding);
+    } catch (err) {
+      this.loggerService.error(
+        'Error creating cluster role binding ---KUBERNETES-SERVICE---',
+        err.message,
+      );
     }
   }
 }

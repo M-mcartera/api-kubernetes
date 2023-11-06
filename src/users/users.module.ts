@@ -14,6 +14,7 @@ import { UserConfig, UserConfigSchema } from 'src/models/userConfig.schema';
 import { KubernetesService } from 'src/kubernetes/kubernetes.service';
 import { LoggerService } from 'src/logger/logger.service';
 import { KubernetesModule } from 'src/kubernetes/kubernetes.module';
+import { Role, RoleSchema } from 'src/models/role.schema';
 
 @Module({
   imports: [
@@ -29,6 +30,10 @@ import { KubernetesModule } from 'src/kubernetes/kubernetes.module';
       {
         name: UserConfig.name,
         schema: UserConfigSchema,
+      },
+      {
+        name: Role.name,
+        schema: RoleSchema,
       },
     ]),
     KubernetesModule,

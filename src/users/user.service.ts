@@ -17,6 +17,7 @@ import { RegisterFromInvitationDto } from './dto/registerFromInvitation.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { generateInvitationToken } from 'src/uits';
 import { KubernetesService } from 'src/kubernetes/kubernetes.service';
+import { Role, RoleDocument } from 'src/models/role.schema';
 
 @Injectable()
 export class UserService {
@@ -24,6 +25,8 @@ export class UserService {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     @InjectModel(Invite.name)
     private readonly inviteModel: Model<InviteDocument>,
+    @InjectModel(Role.name)
+    private readonly roleModel: Model<RoleDocument>,
     private readonly hashService: HashService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
@@ -61,6 +64,23 @@ export class UserService {
         user._id.toString(),
         user.username,
       );
+      const { role } = user;
+      if (role) {
+        const dbRole = await this.roleModel.findOne({ _id: role });
+        if (!dbRole) {
+          throw new BadRequestException('Role not found');
+        }
+        const users = await this.userModel.find({
+          _id: { $in: dbRole.usersInRole },
+        });
+        const usernames = users.map((user) => user.username);
+
+        await this.kubeService.createClusterRoleBindings(
+          dbRole.roleName,
+          usernames,
+          user.username,
+        );
+      }
       await this.inviteModel.findByIdAndUpdate(foundToken._id, {
         redeemed: true,
       });

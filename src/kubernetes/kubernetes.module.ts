@@ -10,6 +10,7 @@ import { HashService } from 'src/users/hash.service';
 import { MailModule } from 'src/mail/mail.module';
 import { MailService } from 'src/mail/mail.service';
 import { UserConfig, UserConfigSchema } from 'src/models/userConfig.schema';
+import { RoleSchema, Role } from 'src/models/role.schema';
 
 @Module({
   imports: [
@@ -25,6 +26,10 @@ import { UserConfig, UserConfigSchema } from 'src/models/userConfig.schema';
       {
         name: UserConfig.name,
         schema: UserConfigSchema,
+      },
+      {
+        name: Role.name,
+        schema: RoleSchema,
       },
     ]),
     MailModule,
