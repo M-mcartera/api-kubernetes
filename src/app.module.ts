@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
@@ -10,6 +10,9 @@ import { MailModule } from './mail/mail.module';
 import { KubernetesModule } from './kubernetes/kubernetes.module';
 import { LoggerService } from './logger/logger.service';
 import { RolesModule } from './roles/roles.module';
+import { ClientKubernetesModule } from './client-kubernetes/client-kubernetes.module';
+import { TestMiddleware } from './middlewares/test.middleware';
+import { ClientKubernetesController } from './client-kubernetes/client-kubernetes.controller';
 
 @Module({
   imports: [
@@ -26,8 +29,13 @@ import { RolesModule } from './roles/roles.module';
     MailModule,
     KubernetesModule,
     RolesModule,
+    ClientKubernetesModule,
   ],
   controllers: [AppController],
   providers: [AppService, LoggerService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TestMiddleware).forRoutes(ClientKubernetesController);
+  }
+}

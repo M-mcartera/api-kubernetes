@@ -15,6 +15,7 @@ import { KubernetesService } from 'src/kubernetes/kubernetes.service';
 import { LoggerService } from 'src/logger/logger.service';
 import { KubernetesModule } from 'src/kubernetes/kubernetes.module';
 import { Role, RoleSchema } from 'src/models/role.schema';
+import { RolesService } from 'src/roles/roles.service';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { Role, RoleSchema } from 'src/models/role.schema';
     SocketGateway,
     LoggerService,
     KubernetesService,
+    RolesService,
   ],
 })
 export class UsersModule {}
