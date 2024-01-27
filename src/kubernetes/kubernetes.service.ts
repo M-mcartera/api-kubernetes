@@ -8,14 +8,13 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { LoggerService } from 'src/logger/logger.service';
+import { LoggerService } from '../logger/logger.service';
 import * as fs from 'fs';
 import { exec } from 'child_process';
-import { UserConfig, UserConfigDocument } from 'src/models/userConfig.schema';
+import { UserConfig, UserConfigDocument } from '../models/userConfig.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { PERMISSION_RESOURCE } from 'src/global/interfaces';
-import { Role } from 'src/models/role.schema';
+import { PERMISSION_RESOURCE } from '../global/interfaces';
 @Injectable()
 export class KubernetesService {
   private coreApi: CoreV1Api;
@@ -227,6 +226,7 @@ export class KubernetesService {
   generateClusterRoleRules(resources: PERMISSION_RESOURCE[]) {
     const rules = [];
 
+    // TODO: if user get wildcard on pods, then new apiGroup for pods/log should be enabled
     resources.forEach((resource) => {
       const tempDto = {
         apiGroups: [''],
@@ -330,7 +330,10 @@ export class KubernetesService {
         serviceAccountName,
       );
 
-      console.log('SUBJECTS', subjects);
+      const kubernetesRoleBinding = await this.roleApi.readClusterRoleBinding(
+        `${roleName}-binding`,
+      );
+
       const clusterRoleBinding = {
         metadata: {
           name: `${roleName}-binding`,
@@ -343,8 +346,15 @@ export class KubernetesService {
         },
       };
 
+      if (kubernetesRoleBinding) {
+        return this.roleApi.replaceClusterRoleBinding(
+          `${roleName}-binding`,
+          clusterRoleBinding,
+        );
+      }
       return this.roleApi.createClusterRoleBinding(clusterRoleBinding);
     } catch (err) {
+      console.log({ err });
       this.loggerService.error(
         'Error creating cluster role binding ---KUBERNETES-SERVICE---',
         err.message,

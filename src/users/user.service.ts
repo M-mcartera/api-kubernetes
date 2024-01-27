@@ -13,11 +13,11 @@ import { HashService } from './hash.service';
 import * as crypto from 'crypto-js';
 import { MailService } from 'src/mail/mail.service';
 import { ConfigService } from '@nestjs/config';
-import { RegisterFromInvitationDto } from './dto/registerFromInvitation.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { generateInvitationToken } from 'src/uits';
 import { KubernetesService } from 'src/kubernetes/kubernetes.service';
 import { Role, RoleDocument } from 'src/models/role.schema';
+import { UserConfig, UserConfigDocument } from 'src/models/userConfig.schema';
 
 @Injectable()
 export class UserService {
@@ -27,6 +27,8 @@ export class UserService {
     private readonly inviteModel: Model<InviteDocument>,
     @InjectModel(Role.name)
     private readonly roleModel: Model<RoleDocument>,
+    @InjectModel(UserConfig.name)
+    private readonly userConfig: Model<UserConfigDocument>,
     private readonly hashService: HashService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
@@ -70,11 +72,21 @@ export class UserService {
         if (!dbRole) {
           throw new BadRequestException('Role not found');
         }
+        //update usersInRole with current user
+        await this.roleModel.updateOne(
+          { _id: dbRole._id },
+          {
+            usersInRole: [...dbRole.usersInRole, user._id],
+          },
+        );
+
+        //get users which are assigned to that role
         const users = await this.userModel.find({
           _id: { $in: dbRole.usersInRole },
         });
         const usernames = users.map((user) => user.username);
 
+        //update the cluster rlole bindings
         await this.kubeService.createClusterRoleBindings(
           dbRole.roleName,
           usernames,
@@ -87,13 +99,28 @@ export class UserService {
 
       return { success: true };
     } catch (err) {
+      console.log(err);
       console.log(err.message);
       throw new BadRequestException(err.message);
     }
   }
 
-  async getUsers() {
-    return this.userModel.find().exec();
+  async getUsers(): Promise<User[]> {
+    const users: User[] = await this.userModel.find().lean().exec();
+
+    const usersWithRoleNames = await Promise.all(
+      users.map(async (user) => {
+        if (user.role === 'ADMIN') {
+          return user;
+        }
+        console.log(user);
+        const userRoleName = await this.roleModel.findById(user.role).exec();
+        return { ...user, role: userRoleName.roleName };
+      }),
+    ).then((res) => res);
+
+    console.log({ usersWithRoleNames });
+    return usersWithRoleNames;
   }
 
   async inviteUser(payload: InviteUserDto) {
@@ -170,25 +197,10 @@ export class UserService {
       }
       const foundUser = await this.getUserByEmail(foundInvitation.email);
       if (foundUser.password) {
-        return { success: false, errorCode: 3, msg: 'User already exist' };
+        return { success: false, errorCode: 3, msg: 'User already exists' };
       }
 
       return { success: true };
-    } catch (err) {
-      throw new BadRequestException(err.message);
-    }
-  }
-
-  async registerUserFromInvitation(
-    token: string,
-    payload: RegisterFromInvitationDto,
-  ) {
-    try {
-      const invitation = await this.inviteModel.findOne({ token });
-      if (!invitation) {
-        throw new BadRequestException('Invalid token');
-      }
-      const { email } = invitation;
     } catch (err) {
       throw new BadRequestException(err.message);
     }
@@ -263,5 +275,10 @@ export class UserService {
       .filter((user) => ids.includes(user._id.toString()))
       .map((user) => user.username);
     return usernames;
+  }
+
+  async generateKubeConfig(userId: string) {
+    const userConfig = await this.userConfig.findOne({ userId });
+    return userConfig.config.users[0];
   }
 }

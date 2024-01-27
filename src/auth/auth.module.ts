@@ -17,6 +17,7 @@ import { LoggerService } from 'src/logger/logger.service';
 import { KubernetesModule } from 'src/kubernetes/kubernetes.module';
 import { UserConfig, UserConfigSchema } from 'src/models/userConfig.schema';
 import { Role, RoleSchema } from 'src/models/role.schema';
+import { RolesService } from 'src/roles/roles.service';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { Role, RoleSchema } from 'src/models/role.schema';
     MailService,
     KubernetesService,
     LoggerService,
+    RolesService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

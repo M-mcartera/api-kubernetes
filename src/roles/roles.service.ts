@@ -11,6 +11,13 @@ import { LoggerService } from 'src/logger/logger.service';
 import { RoleDocument, Role } from 'src/models/role.schema';
 import { UserService } from 'src/users/user.service';
 import { CreateRoleDto } from './dto/create-role.dto';
+import { PERMISSIONS_ACTION, PERMISSION_RESOURCE } from 'src/global/interfaces';
+import * as _ from 'lodash';
+
+type MappedResources = {
+  name: string;
+  type: 'read' | 'write' | 'wildcard';
+};
 
 @Injectable()
 export class RolesService {
@@ -62,7 +69,6 @@ export class RolesService {
           return role;
         }),
       );
-      console.log({ transformedRoles });
       return transformedRoles;
     } catch (err) {
       this.loggerService.error('Error getting roles', err.message);
@@ -97,5 +103,47 @@ export class RolesService {
       this.loggerService.error('Error updating role', err.message);
       throw new InternalServerErrorException('Error updating role');
     }
+  }
+
+  async getRole(id: string): Promise<MappedResources[] | []> {
+    const role = await this.roleModel.findOne({ _id: id });
+    return this.mapRoleResources(role);
+  }
+
+  mapRoleResources(role: Role): MappedResources[] | [] {
+    const resources: PERMISSION_RESOURCE[] = role.resources;
+    const readActions = ['get', 'list'];
+    const writeActions = ['create', 'update', 'patch', 'delete'];
+
+    if (_.isEmpty(resources)) {
+      return [];
+    }
+
+    const mappedResources: MappedResources[] = resources.map((resource) => {
+      const actions: PERMISSIONS_ACTION[] = resource.actions;
+
+      const isWildcard = actions.some(
+        (action: PERMISSIONS_ACTION) => action.name === 'all' && action.checked,
+      );
+      const isRead = actions.some(
+        (action: PERMISSIONS_ACTION) =>
+          readActions.includes(action.name) && action.checked,
+      );
+      const isWrite = actions.some(
+        (action: PERMISSIONS_ACTION) =>
+          writeActions.includes(action.name) && action.checked,
+      );
+      if (isWildcard) {
+        return { name: resource.name, type: 'wildcard' };
+      }
+      if (isWrite && !isRead) {
+        return { name: resource.name, type: 'write' };
+      }
+      if (isRead && !isWrite) {
+        return { name: resource.name, type: 'read' };
+      }
+    });
+
+    return mappedResources.filter((el) => el);
   }
 }
